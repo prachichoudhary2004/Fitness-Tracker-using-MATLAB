@@ -1,0 +1,112 @@
+function calorie_counter()
+    % Gathering user information
+    userInfo = get_user_info();
+
+    % Define a list of activities  and their calorie burn rates
+    activities = {'🏃‍♂ Running', 10; 
+                  '🚴 Cycling', 8; 
+                  '🏊 Swimming', 7; 
+                  '🚶 Walking', 4; 
+                  '🧘 Yoga', 3};
+
+    % Food item comparisons in calories
+    food_items = {'🍕 Slice of Pizza', 285; 
+                  '☕ Cup of Coffee', 2; 
+                  '🍫 Chocolate Bar', 230; 
+                  '🍏 Apple', 95; 
+                  '🍌 Banana', 105};
+
+    % List of sweet rewards with their calorie values
+    rewards = {'🍰 Cake', 350; 
+               '🍩 Donut', 250; 
+               '🍦 Ice Cream', 200; 
+               '🍫 Chocolate Bar', 230; 
+               '🍪 Cookie', 150};
+
+    %  user for their calorie burn goal
+    goal = str2double(inputdlg('Enter your calorie burn goal: ', 'Calorie Goal'));
+
+    % User selects the activity
+    activityChoice = list_activities(activities); % Get user activity choice
+    duration = str2double(inputdlg('Enter duration of activity in minutes: ', 'Activity Duration'));
+
+    % Calculate calories burned based on user's weight
+    caloriesBurned = calculate_calories(activities, activityChoice, duration, userInfo.weight);
+
+    %   results
+    fprintf('Calories burned: %.2f\n', caloriesBurned);
+    
+    % Calculate and display the difference
+    difference = caloriesBurned - goal;
+    if difference >= 0
+        fprintf('Congratulations! You met your calorie burn goal of %.2f calories!\n', goal);
+        fprintf('You exceeded your goal by %.2f calories.\n', difference);
+        suggest_reward(rewards, difference); % Suggest a sweet reward
+    else
+        fprintf('You need %.2f more calories to reach your goal of %.2f calories.\n', -difference, goal);
+        suggest_activity(activities, -difference); % Suggest activities to burn the remaining calories
+    end
+    
+    % Display food comparison
+    display_food_comparison(caloriesBurned, food_items);
+end
+
+function userInfo = get_user_info()
+    % Get user information through dialog boxes
+    prompt = {'Enter your gender (M/F):', 'Enter your age:', 'Enter your weight in kg:'};
+    dlgtitle = 'User Information';
+    answer = inputdlg(prompt, dlgtitle);
+    
+    userInfo.gender = answer{1};
+    userInfo.age = str2double(answer{2});
+    userInfo.weight = str2double(answer{3});
+end
+
+function choice = list_activities(activities)
+    % Display activities in a dialog box
+    options = cellfun(@(x) sprintf('%s', x), activities(:, 1), 'UniformOutput', false);
+    [choiceIndex, ~] = listdlg('PromptString', 'Choose an activity:', ...
+                                'SelectionMode', 'single', ...
+                                'ListString', options);
+    
+    choice = choiceIndex;
+end
+
+function calories = calculate_calories(activities, choice, duration, weight)
+    % Get the calorie burn rate for the chosen activity
+    burnRate = activities{choice, 2}; % calories per minute
+    % Adjust burn rate based on user's weight (assuming a simple multiplier)
+    adjustedBurnRate = burnRate * (weight / 70); % 70 kg is assumed as the average weight
+    % Calculate calories burned
+    calories = adjustedBurnRate * duration; % Adjust for time
+end
+
+function display_food_comparison(caloriesBurned, food_items)
+    fprintf('You burned the equivalent of:\n');
+    for i = 1:size(food_items, 1)
+        food_calories = food_items{i, 2};
+        comparison = caloriesBurned / food_calories;
+        if comparison >= 1
+            fprintf('%d %s\n', round(comparison), food_items{i, 1}); % Display whole number
+        end
+    end
+end
+
+function suggest_activity(activities, difference)
+    fprintf('To burn the remaining %.2f calories, consider the following activities:\n', difference);
+    for i = 1:size(activities, 1)
+        burnRate = activities{i, 2}; % calories per minute
+        timeNeeded = difference / burnRate; % minutes needed
+        fprintf('%s for %.2f minutes\n', activities{i, 1}, timeNeeded);
+    end
+end
+
+function suggest_reward(rewards, difference)
+    fprintf('How about treating yourself to one of these rewards:\n');
+    for i = 1:size(rewards, 1)
+        reward_calories = rewards{i, 2}; % calories for the reward
+        if reward_calories < difference
+            fprintf('%s (%d calories)\n', rewards{i, 1}, reward_calories);
+        end
+    end
+end
