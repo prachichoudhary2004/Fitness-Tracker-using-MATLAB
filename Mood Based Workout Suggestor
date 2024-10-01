@@ -1,0 +1,37 @@
+
+% Define the options for the self-report survey
+moodOptions = {'Stressed', 'Calm', 'Energized', 'Tired', 'Happy'};
+
+% Display the mood selection dialog using questdlg
+userMoodState = questdlg('How are you feeling today?', ...
+    'Mood Survey', ...
+    moodOptions{1}, moodOptions{2}, moodOptions{3}, moodOptions{2}); % Default: 'Calm'
+
+% Check if the user made a selection
+if ~isempty(userMoodState)
+    % Convert the selected mood to lowercase for consistency
+    moodState = lower(userMoodState);
+    
+    % Determine the workout suggestion based on the selected mood
+    switch moodState
+        case 'stressed'
+            suggestion = 'Relaxing exercises like yoga or meditation.';
+        case 'calm'
+            suggestion = 'Light cardio like walking or cycling.';
+        case 'energized'
+            suggestion = 'High-intensity exercises like running or strength training.';
+        case 'tired'
+            suggestion = 'Gentle stretching or low-intensity activities.';
+        case 'happy'
+            suggestion = 'Fun activities like dancing or group sports.';
+        otherwise
+            suggestion = 'Mood not recognized. Please select a valid mood.';
+    end
+    
+    % Display the suggestion in a message box
+    msgbox(['Your mood: ', userMoodState, ...
+            newline, 'Suggested workout: ', suggestion], 'Workout Suggestion');
+else
+    % Handle case where the user did not make a selection
+    msgbox('No mood selected.', 'Error');
+end
